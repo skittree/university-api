@@ -66,6 +66,7 @@ class Semester(Base):
     start = Column(DateTime, nullable=False)
     end = Column(DateTime, nullable=False)
     curriculum = relationship("Curriculum", back_populates="semesters")
+    courses = relationship("Course", back_populates="semesters")
 
 # it is possible to facilitate the same split with less tables via a "roles" table, emulating the "participant" class in the UML diagram
 # for the current implementation i believe having separate tables (students and professors, students/profs to course) yields the best performance
@@ -74,12 +75,14 @@ class Course(Base):
     __tablename__ = "courses"
 
     id = Column(Integer, primary_key=True)
+    semester_id = Column(Integer, ForeignKey("semesters.id"))
     name = Column(String, nullable=False)
     desc = Column(String)
     students = relationship("Student", secondary="course_students", back_populates="courses")
     professors = relationship("Professor", secondary="course_professors", back_populates="courses")
     tasks = relationship("Task", back_populates="courses")
     grades = relationship("Grade", back_populates="courses")
+    semester = relationship("Semester", back_populates="courses")
 
 course_students = Table("course_students", Base.metadata,
     Column("course_id", ForeignKey("courses.id"), primary_key=True),
@@ -91,12 +94,11 @@ course_professors = Table("course_professors", Base.metadata,
     Column("professor_id", ForeignKey("professors.id"), primary_key=True)
 )
 
-# the approach of saving NULLable columns, while violating the 3NF rule, can help us make less requests
+# the approach of saving NULLable columns, while violating the 3NF rule, can help us make less requests at the cost of extra disk space
+# we can find the exact thing that occupies the timeslot by just retrieving this table
 
-# we can find the exact thing that occupies the timeslot by retrieving just this table
-
-# if we were to add this relationship to Class and Exam tables instead, looking up timeslot availability
-# would require us to check both the class and exam tables
+# if we were to add this relationship to Class and Exam tables instead, 
+# looking up timeslot availability would require us to check both the class and exam tables
 
 class Timeslot(Base):
     __tablename__ = "timeslots"
