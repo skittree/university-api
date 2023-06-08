@@ -6,12 +6,12 @@ class Student(Base):
     __tablename__ = "students"
 
     id = Column(Integer, primary_key=True)
-    group_id = Column(Integer, ForeignKey("groups.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
     name = Column(String, nullable=False)
     phone = Column(String)
     address = Column(String)
     group = relationship("Group", back_populates="students")
-    grades = relationship("Grade", back_populates="students")
+    grades = relationship("Grade", back_populates="student")
     courses = relationship("Course", secondary="course_students", back_populates="students")
 
 class Professor(Base):
@@ -29,8 +29,10 @@ class Group(Base):
     __tablename__ = "groups"
  
     id = Column(Integer, primary_key=True)
-    department_id = Column(Integer, ForeignKey("departments.id"))
+    department_id = Column(Integer, ForeignKey("departments.id"), nullable=False)
+    enrolled_at = Column(DateTime, nullable=False)
     department = relationship("Department", back_populates="groups")
+    students = relationship("Student", back_populates="group")
 
 class Department(Base):
     __tablename__ = "departments"
@@ -41,8 +43,10 @@ class Department(Base):
     desc = Column(String)
     url = Column(String)
     faculty = relationship("Faculty", back_populates="departments")
-    buildings = relationship("Building", back_populates="departments")
-    professors = relationship("Professor", back_populates="departments")
+    groups = relationship("Group", back_populates="department")
+    buildings = relationship("Building", back_populates="department")
+    professors = relationship("Professor", back_populates="department")
+    curricula = relationship("Curriculum", back_populates="department")
 
 class Faculty(Base):
     __tablename__ = "faculties"
@@ -50,13 +54,15 @@ class Faculty(Base):
     id = Column(Integer, primary_key=True)
     code = Column(String, nullable=False)
     name = Column(String, nullable=False)
+    departments = relationship("Department", back_populates="faculty")
 
 class Curriculum(Base):
     __tablename__ = "curriculums"
 
     id = Column(Integer, primary_key=True)
     department_id = Column(Integer, ForeignKey("departments.id"))
-    department = relationship("Department", back_populates="groups")
+    department = relationship("Department", back_populates="curricula")
+    semesters = relationship("Semester", back_populates="curriculum")
 
 class Semester(Base):
     __tablename__ = "semesters"
@@ -66,7 +72,7 @@ class Semester(Base):
     start = Column(DateTime, nullable=False)
     end = Column(DateTime, nullable=False)
     curriculum = relationship("Curriculum", back_populates="semesters")
-    courses = relationship("Course", back_populates="semesters")
+    courses = relationship("Course", back_populates="semester")
 
 # it is possible to facilitate the same split with less tables via a "roles" table, emulating the "participant" class in the UML diagram
 # for the current implementation i believe having separate tables (students and professors, students/profs to course) yields the best performance
@@ -80,8 +86,8 @@ class Course(Base):
     desc = Column(String)
     students = relationship("Student", secondary="course_students", back_populates="courses")
     professors = relationship("Professor", secondary="course_professors", back_populates="courses")
-    tasks = relationship("Task", back_populates="courses")
-    grades = relationship("Grade", back_populates="courses")
+    tasks = relationship("Task", back_populates="course")
+    grades = relationship("Grade", back_populates="course")
     semester = relationship("Semester", back_populates="courses")
 
 course_students = Table("course_students", Base.metadata,
@@ -110,8 +116,8 @@ class Timeslot(Base):
     start = Column(DateTime, nullable=False)
     end = Column(DateTime, nullable=False)
     auditorium = relationship("Auditorium", back_populates="timeslots")
-    classes = relationship("Class", back_populates="timeslots", cascade="all, delete-orphan")
-    exams = relationship("Exam", back_populates="timeslots", cascade="all, delete-orphan")
+    classes = relationship("Class", back_populates="timeslot", cascade="all, delete-orphan", single_parent=True)
+    exams = relationship("Exam", back_populates="timeslot", cascade="all, delete-orphan", single_parent=True)
     # add unique constraints to ensure we can only have the class/exam take one timeslot
     __table_args__ = (UniqueConstraint('class_id'), UniqueConstraint('exam_id'))
     
@@ -129,18 +135,19 @@ class Exam(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     timeslot = relationship("Timeslot", back_populates="exams")
-    grades = relationship("Grade", back_populates="exams")
+    grades = relationship("Grade", back_populates="exam")
 
 class Task(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True)
     course_id = Column(Integer, ForeignKey("courses.id"))
-    name = Column(String)
+    name = Column(String, nullable=False)
+    desc = Column(String)
     created_at = Column(DateTime, nullable=False)
     deadline = Column(DateTime)
     course = relationship("Course", back_populates="tasks")
-    grades = relationship("Grade", back_populates="tasks")
+    grades = relationship("Grade", back_populates="task")
 
 class Auditorium(Base):
     __tablename__ = "auditoriums"
@@ -153,7 +160,7 @@ class Auditorium(Base):
     has_projector = Column(Boolean, nullable=False)
     has_board = Column(Boolean, nullable=False)
     building = relationship("Building", back_populates="auditoriums")
-    timeslots = relationship("Timeslot", back_populates="auditoriums")
+    timeslots = relationship("Timeslot", back_populates="auditorium")
 
 class Building(Base):
     __tablename__ = "buildings"
@@ -163,7 +170,7 @@ class Building(Base):
     address = Column(String, nullable=False)
     name = Column(String, nullable=False)
     floors = Column(Integer)
-    auditoriums = relationship("Auditorium", back_populates="buildings")
+    auditoriums = relationship("Auditorium", back_populates="building")
     department = relationship("Department", back_populates="buildings")
 
 class Grade(Base):

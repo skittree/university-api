@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 router = APIRouter(
     prefix="/grades",
-    tags=["grades"],
+    tags=["Grades"],
     responses={404: {"description": "Not found"}},
 )
 
