@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy import select
-from pydantic import parse_obj_as
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from . import models, schemas
 
@@ -90,5 +90,8 @@ async def get_course(session: AsyncSession, course_id: int) -> models.Course:
     return course
 
 async def get_course_students(session: AsyncSession, course_id: int) -> list[models.Student]:
-    student_query = await session.execute(select(models.Student).join(models.Course).where(models.Course.id == course_id))
-    return student_query.scalars().all()
+    course_query = await session.execute(select(models.Course).options(selectinload(models.Course.students)).where(models.Course.id == course_id))
+    course = course_query.scalar()
+    if course is None:
+        raise NoResultFound({"statement": "Course with this id does not exist.", "params": course_id})
+    return course.students

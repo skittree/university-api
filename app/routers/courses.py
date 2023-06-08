@@ -1,7 +1,6 @@
 from pydantic import parse_obj_as
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError, NoResultFound
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from .. import schemas, crud
 from ..db import get_session
 
