@@ -18,7 +18,7 @@ class Professor(Base):
     __tablename__ = "professors"
 
     id = Column(Integer, primary_key=True)
-    department_id = Column(Integer, ForeignKey("departments.id"))
+    department_id = Column(Integer, ForeignKey("departments.id"), nullable=False)
     name = Column(String, nullable=False)
     phone = Column(String)
     address = Column(String)
@@ -60,7 +60,7 @@ class Curriculum(Base):
     __tablename__ = "curriculums"
 
     id = Column(Integer, primary_key=True)
-    department_id = Column(Integer, ForeignKey("departments.id"))
+    department_id = Column(Integer, ForeignKey("departments.id"), nullable=False)
     name = Column(String, nullable=False)
     department = relationship("Department", back_populates="curricula")
     semesters = relationship("Semester", back_populates="curriculum")
@@ -69,7 +69,7 @@ class Semester(Base):
     __tablename__ = "semesters"
 
     id = Column(Integer, primary_key=True)
-    curriculum_id = Column(Integer, ForeignKey("curriculums.id"))
+    curriculum_id = Column(Integer, ForeignKey("curriculums.id"), nullable=False)
     start = Column(DateTime, nullable=False)
     end = Column(DateTime, nullable=False)
     curriculum = relationship("Curriculum", back_populates="semesters")
@@ -87,6 +87,7 @@ class Course(Base):
     desc = Column(String)
     students = relationship("Student", secondary="course_students", back_populates="courses")
     professors = relationship("Professor", secondary="course_professors", back_populates="courses")
+    timeslots = relationship("Timeslot", back_populates="course")
     tasks = relationship("Task", back_populates="course")
     grades = relationship("Grade", back_populates="course")
     semester = relationship("Semester", back_populates="courses")
@@ -111,12 +112,14 @@ class Timeslot(Base):
     __tablename__ = "timeslots"
 
     id = Column(Integer, primary_key=True)
-    auditorium_id = Column(Integer, ForeignKey("auditoriums.id"))
-    class_id = Column(Integer, ForeignKey("classes.id"), nullable=True)
-    exam_id = Column(Integer, ForeignKey("exams.id"), nullable=True)
+    auditorium_id = Column(Integer, ForeignKey("auditoriums.id"), nullable=False)
+    course_id = Column(Integer, ForeignKey("courses.id"))
+    class_id = Column(Integer, ForeignKey("classes.id"))
+    exam_id = Column(Integer, ForeignKey("exams.id"))
     start = Column(DateTime, nullable=False)
     end = Column(DateTime, nullable=False)
     auditorium = relationship("Auditorium", back_populates="timeslots")
+    course = relationship("Course", back_populates="timeslots")
     classes = relationship("Class", back_populates="timeslot", cascade="all, delete-orphan", single_parent=True)
     exams = relationship("Exam", back_populates="timeslot", cascade="all, delete-orphan", single_parent=True)
     # add unique constraints to ensure we can only have the class/exam take one timeslot
@@ -142,7 +145,7 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True)
-    course_id = Column(Integer, ForeignKey("courses.id"))
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     name = Column(String, nullable=False)
     desc = Column(String)
     created_at = Column(DateTime, nullable=False)
@@ -154,7 +157,7 @@ class Auditorium(Base):
     __tablename__ = "auditoriums"
 
     id = Column(Integer, primary_key=True)
-    building_id = Column(Integer, ForeignKey("buildings.id"))
+    building_id = Column(Integer, ForeignKey("buildings.id"), nullable=False)
     room_number = Column(Integer, nullable=False)
     floor = Column(Integer)
     max_capacity = Column(Integer)
@@ -178,7 +181,7 @@ class Grade(Base):
     __tablename__ = "grades"
 
     id = Column(Integer, primary_key=True)
-    student_id = Column(Integer, ForeignKey("students.id"))
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
     grade = Column(Integer, nullable=False)
     task_id = Column(Integer, ForeignKey("tasks.id"), nullable=True)
     exam_id = Column(Integer, ForeignKey("exams.id"), nullable=True)

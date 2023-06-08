@@ -31,4 +31,5 @@ async def init_models():
         if not table_names:
             print("Creating models...")
             await conn.run_sync(Base.metadata.create_all)
+            return
         print("Tables already exist. Skipping model creation.")
