@@ -5,7 +5,10 @@ The following repository contains a university management schema and a FastAPI i
 ## Tasks
 
 ### 1. UML Class (ER Diagram)
-[![uml_class](https://github.com/skittree/university-api/assets/32728173/402f51a7-51f0-4b61-add4-5eae4c7e5d3b)](https://drive.google.com/file/d/1SXw5WxPxwkkTuPkcA8vg4nhze4KFbY_i/view?usp=sharing)
+
+You can access the [diagrams](https://drive.google.com/file/d/1SXw5WxPxwkkTuPkcA8vg4nhze4KFbY_i/view?usp=sharing) in draw.io.
+
+![uml_class](https://github.com/skittree/university-api/assets/32728173/402f51a7-51f0-4b61-add4-5eae4c7e5d3b)
 ![er_dbeaver](https://github.com/skittree/university-api/assets/32728173/cd140625-4eca-4307-959c-7c378df62c91)
 
 ### 2. SQL Requests
@@ -258,5 +261,7 @@ docker compose -f "docker-compose.yml" up -d --build
 ## Usage
 
 To launch the documentation on a local machine that is running the API on default port `8000`, you can use the following link: http://localhost:8000/docs:
+
+![image](https://github.com/skittree/university-api/assets/32728173/f329fd51-edc9-4041-93eb-e17be0da02aa)
 
 Similarly, using the default `.env` parameters, the DB connection link is `postgresql://localhost:5432/university`.
