@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from .config import DATABASE_URL
+from sqlalchemy import inspect
 from sqlalchemy.ext.declarative import declarative_base
 
 def _declarative_constructor(self, **kwargs):
@@ -20,6 +21,14 @@ async def get_session() -> AsyncSession:
         yield session
 
 async def init_models():
+    def get_table_names(conn):
+        inspector = inspect(conn)
+        return inspector.get_table_names()
+    
     async with engine.begin() as conn:
-        print("Creating models...")
-        await conn.run_sync(Base.metadata.create_all)
+        table_names = await conn.run_sync(get_table_names)
+        print(table_names)
+        if not table_names:
+            print("Creating models...")
+            await conn.run_sync(Base.metadata.create_all)
+        print("Tables already exist. Skipping model creation.")

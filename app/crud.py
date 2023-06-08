@@ -1,3 +1,5 @@
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -143,3 +145,34 @@ async def update_course_grade(session: AsyncSession, grade_id: int, schema: sche
     except IntegrityError as ex:
         await session.rollback()
         raise IntegrityError("Course grade update failed.", ex.params, ex.orig)
+    
+async def insert_dummy_data(session: AsyncSession):
+    data = [
+        models.Faculty(code="03.03.09", name="Faculty1"),
+        models.Faculty(code="04.03.09", name="Faculty2"),
+        models.Department(name="Mathematics Department", faculty_id=1),
+        models.Department(name="Linguistics Department", faculty_id=2),
+        models.Group(enrolled_at=datetime.now(), department_id=1),
+        models.Group(enrolled_at=datetime.now()-relativedelta(years=1), department_id=1),
+        models.Group(enrolled_at=datetime.now()-relativedelta(years=2), department_id=2),
+        models.Professor(name="Professor1", phone="1111111111", address="789 Oak St", department_id=1),
+        models.Professor(name="Professor2", phone="2222222222", address="456 Pine St", department_id=2),
+        models.Curriculum(department_id=1, name="Beginner Math"),
+        models.Curriculum(department_id=2, name="Beginner English"),
+        models.Semester(curriculum_id=1, start=datetime.now(), end=datetime.now()+relativedelta(months=3)),
+        models.Semester(curriculum_id=1, start=datetime.now()-relativedelta(months=3), end=datetime.now()),
+    ]
+
+    students = [
+        models.Student(group_id=1, name="John Doe", phone="1234567890", address="123 Main St"),
+        models.Student(group_id=1, name="Jane Smith", phone="9876543210", address="456 Elm St"),
+        models.Student(group_id=2, name="Jane Doe", phone="1234563210", address="123 Elm St"),
+        models.Student(group_id=3, name="John Smith", phone="9876547890", address="456 Main St"),
+    ]
+
+    course = models.Course(semester_id=1, name="Математика", students=students)
+
+    session.add_all(data)
+    session.add_all(students)
+    session.add(course)
+    await session.commit()

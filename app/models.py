@@ -61,6 +61,7 @@ class Curriculum(Base):
 
     id = Column(Integer, primary_key=True)
     department_id = Column(Integer, ForeignKey("departments.id"))
+    name = Column(String, nullable=False)
     department = relationship("Department", back_populates="curricula")
     semesters = relationship("Semester", back_populates="curriculum")
 
