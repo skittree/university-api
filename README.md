@@ -163,7 +163,7 @@ CREATE TABLE courses (
 CREATE TABLE timeslots (
     id SERIAL NOT NULL, 
     auditorium_id INTEGER NOT NULL, 
-	course_id INTEGER,
+    course_id INTEGER,
     class_id INTEGER, 
     exam_id INTEGER, 
     start TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
@@ -172,7 +172,7 @@ CREATE TABLE timeslots (
     UNIQUE (class_id), 
     UNIQUE (exam_id), 
     FOREIGN KEY(auditorium_id) REFERENCES auditoriums (id), 
-	FOREIGN KEY(course_id) REFERENCES courses (id),
+    FOREIGN KEY(course_id) REFERENCES courses (id),
     FOREIGN KEY(class_id) REFERENCES classes (id), 
     FOREIGN KEY(exam_id) REFERENCES exams (id)
 );
