@@ -95,3 +95,51 @@ async def get_course_students(session: AsyncSession, course_id: int) -> list[mod
     if course is None:
         raise NoResultFound({"statement": "Course with this id does not exist.", "params": course_id})
     return course.students
+
+async def add_course_grade(session: AsyncSession, schema: schemas.CourseGradeCreate) -> models.Grade:
+    params = {"student_id": schema.student_id, "course_id": schema.course_id}
+    student_query = await session.execute(
+        select(models.Student)        
+        .join(models.Student.courses)
+        .where(
+            (models.Student.id == schema.student_id)
+            & (models.Course.id == schema.course_id)
+        )
+    )
+    student = student_query.scalar()
+
+    if student is None:
+        raise NoResultFound({"statement": "Student cannot be found for the specified course.", "params": params})
+
+    grade_query = await session.execute(select(models.Grade).where((models.Grade.student_id == schema.student_id) & (models.Grade.course_id == schema.course_id)))
+    grade = grade_query.scalar()
+    if grade:
+        raise IntegrityError("Grade already placed for student in this course.", params, grade_query)
+
+    grade = models.Grade(**schema.dict())
+    session.add(grade)
+    try:
+        await session.commit()
+        return grade
+    except IntegrityError as ex:
+        await session.rollback()
+        raise IntegrityError("Course grade add failed.", ex.params, ex.orig)
+
+async def update_course_grade(session: AsyncSession, grade_id: int, schema: schemas.CourseGradeUpdate) -> models.Grade:
+    grade_query = await session.execute(
+        select(models.Grade).where(models.Grade.id == grade_id)
+    )
+    grade = grade_query.scalar()
+
+    if grade is None:
+        raise NoResultFound({"statement": "Grade with id cannot be found", "params": grade_id})
+
+    grade.grade = schema.grade
+
+    session.add(grade)
+    try:
+        await session.commit()
+        return grade
+    except IntegrityError as ex:
+        await session.rollback()
+        raise IntegrityError("Course grade update failed.", ex.params, ex.orig)
