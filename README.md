@@ -5,8 +5,8 @@ The following repository contains a university management schema and a FastAPI i
 ## Tasks
 
 ### 1. UML Class (ER Diagram)
-
-<iframe src="https://drive.google.com/file/d/1SXw5WxPxwkkTuPkcA8vg4nhze4KFbY_i/preview" width="640" height="480" allow="autoplay"></iframe>
+[![uml_class](https://github.com/skittree/university-api/assets/32728173/402f51a7-51f0-4b61-add4-5eae4c7e5d3b)](https://drive.google.com/file/d/1SXw5WxPxwkkTuPkcA8vg4nhze4KFbY_i/view?usp=sharing)
+![er_dbeaver](https://github.com/skittree/university-api/assets/32728173/cd140625-4eca-4307-959c-7c378df62c91)
 
 ### 2. SQL Requests
 
