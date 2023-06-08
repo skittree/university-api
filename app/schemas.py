@@ -2,11 +2,11 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
-class StudentBase(BaseModel):
+class BasePerson(BaseModel):
     phone: str | None = Field(None, example="+12345678901")
     address: str | None = Field(None, example="Lenina st. 6")
 
-class StudentCreate(StudentBase):
+class StudentCreate(BasePerson):
     group_id: int = Field(..., example=1)
     name: str = Field(..., example="Dmitry")
 
@@ -16,19 +16,47 @@ class StudentOut(StudentCreate):
     class Config:
         orm_mode = True
 
-class StudentUpdate(StudentBase):
+class StudentUpdate(BasePerson):
     group_id: int | None = Field(None, example=1)
-    name: str  | None = Field(None, example="Dmitry")
+    name: str | None = Field(None, example="Ivan")
 
-class Professor(BaseModel):
-    department_id: int
-    name: str
-    phone: Optional[str]
-    address: Optional[str]
+class ProfessorCreate(BasePerson):
+    department_id: int = Field(..., example=1)
+    name: str = Field(..., example="John")
+
+class ProfessorOut(ProfessorCreate):
+    id: int
 
     class Config:
         orm_mode = True
 
+class BaseCourse(BaseModel):
+    desc: str = Field(None, example="Applied mathematics for first years")
+    semester_id: int | None = Field(None, example=1)
+
+class CourseCreate(BaseCourse):
+    name: str = Field(..., example="Mathematics 1")
+
+class CourseOut(CourseCreate):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class CourseUpdate(BaseCourse):
+    semester_id: int | None = Field(None, example=2)
+    name: str | None = Field(None, example="Mathematics 2")
+
+class Grade(BaseModel):
+    id: int
+    student_id: int
+    grade: int
+    task_id: Optional[int]
+    exam_id: Optional[int]
+    course_id: Optional[int]
+
+    class Config:
+        orm_mode = True
 
 class Group(BaseModel):
     id: int
@@ -37,7 +65,6 @@ class Group(BaseModel):
 
     class Config:
         orm_mode = True
-
 
 class Department(BaseModel):
     id: int
@@ -49,7 +76,6 @@ class Department(BaseModel):
     class Config:
         orm_mode = True
 
-
 class Faculty(BaseModel):
     id: int
     code: str
@@ -58,14 +84,12 @@ class Faculty(BaseModel):
     class Config:
         orm_mode = True
 
-
 class Curriculum(BaseModel):
     id: int
     department_id: Optional[int]
 
     class Config:
         orm_mode = True
-
 
 class Semester(BaseModel):
     id: int
@@ -75,17 +99,6 @@ class Semester(BaseModel):
 
     class Config:
         orm_mode = True
-
-
-class Course(BaseModel):
-    id: int
-    semester_id: int
-    name: str
-    desc: Optional[str]
-
-    class Config:
-        orm_mode = True
-
 
 class Timeslot(BaseModel):
     id: int
@@ -98,7 +111,6 @@ class Timeslot(BaseModel):
     class Config:
         orm_mode = True
 
-
 class Class(BaseModel):
     id: int
     name: str
@@ -106,14 +118,12 @@ class Class(BaseModel):
     class Config:
         orm_mode = True
 
-
 class Exam(BaseModel):
     id: int
     name: str
 
     class Config:
         orm_mode = True
-
 
 class Task(BaseModel):
     id: int
@@ -125,7 +135,6 @@ class Task(BaseModel):
 
     class Config:
         orm_mode = True
-
 
 class Auditorium(BaseModel):
     id: int
@@ -139,25 +148,12 @@ class Auditorium(BaseModel):
     class Config:
         orm_mode = True
 
-
 class Building(BaseModel):
     id: int
     department_id: Optional[int]
     address: str
     name: str
     floors: Optional[int]
-
-    class Config:
-        orm_mode = True
-
-
-class Grade(BaseModel):
-    id: int
-    student_id: int
-    grade: int
-    task_id: Optional[int]
-    exam_id: Optional[int]
-    course_id: Optional[int]
 
     class Config:
         orm_mode = True
