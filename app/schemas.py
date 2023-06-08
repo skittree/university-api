@@ -2,17 +2,23 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
-class Student(BaseModel):
-    group_id: int = Field(..., example=1)
-    name: str = Field(..., example="Dmitry")
+class StudentBase(BaseModel):
     phone: str | None = Field(None, example="+12345678901")
     address: str | None = Field(None, example="Lenina st. 6")
 
-class StudentOut(Student):
+class StudentCreate(StudentBase):
+    group_id: int = Field(..., example=1)
+    name: str = Field(..., example="Dmitry")
+
+class StudentOut(StudentCreate):
     id: int
 
     class Config:
         orm_mode = True
+
+class StudentUpdate(StudentBase):
+    group_id: int | None = Field(None, example=1)
+    name: str  | None = Field(None, example="Dmitry")
 
 class Professor(BaseModel):
     department_id: int

@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 @router.post("/")
-async def add_student(student: schemas.Student, session: AsyncSession = Depends(get_session)) -> schemas.StudentOut:
+async def add_student(student: schemas.StudentCreate, session: AsyncSession = Depends(get_session)) -> schemas.StudentOut:
     try:
         student = await crud.create_student(session, student)
         return schemas.StudentOut.from_orm(student)
@@ -38,9 +38,28 @@ async def get_student(student_id: int, session: AsyncSession = Depends(get_sessi
         )
 
 @router.put("/{student_id}")
-async def update_student():
-    return
+async def update_student(student_id: int, student: schemas.StudentUpdate, session: AsyncSession = Depends(get_session)) -> schemas.StudentOut:
+    try:
+        student = await crud.update_student(session, student_id, student)
+        return schemas.StudentOut.from_orm(student)
+    except NoResultFound as ex:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=ex.args,
+        )
+    except IntegrityError as ex:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"statement": ex.statement, "params": ex.params},
+        )
 
 @router.delete("/{student_id}")
-async def delete_student():
-    return
+async def delete_student(student_id: int, session: AsyncSession = Depends(get_session)) -> schemas.StudentOut:
+    try:
+        student = await crud.delete_student(session, student_id)
+        return schemas.StudentOut.from_orm(student)
+    except NoResultFound as ex:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=ex.args,
+        )
